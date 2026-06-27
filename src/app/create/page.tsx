@@ -50,7 +50,7 @@ export default function CreatePage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-canvas">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-canvas lg:h-screen lg:overflow-hidden">
       {/* Header */}
       <header className="no-print sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-6 sm:py-3">
@@ -86,9 +86,11 @@ export default function CreatePage() {
 
       {showPublish && <SupportDialog onClose={() => setShowPublish(false)} />}
 
-      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 px-3 pb-24 pt-4 sm:px-6 sm:pb-8 lg:grid-cols-[380px_minmax(0,1fr)] print:!block print:!p-0">
+      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 px-3 pb-24 pt-4 sm:px-6 sm:pb-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:min-h-0 lg:overflow-hidden print:!block print:!p-0">
         {/* Controls */}
-        <div className={`no-print space-y-5 ${mobileTab === "edit" ? "block" : "hidden"} lg:block`}>
+        <div
+          className={`no-print space-y-5 ${mobileTab === "edit" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto lg:pb-6 lg:pr-2`}
+        >
           <div>
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-maroon">Choose a template</h2>
             <TemplatePicker templateId={templateId} onSelect={setTemplateId} />
@@ -98,7 +100,7 @@ export default function CreatePage() {
 
         {/* Preview (always printable; visible per tab on mobile) */}
         <div
-          className={`${mobileTab === "preview" ? "block" : "hidden"} lg:sticky lg:top-24 lg:block lg:h-[calc(100vh-120px)] lg:overflow-y-auto print:!block`}
+          className={`${mobileTab === "preview" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto print:!block`}
         >
           <div className="rounded-xl bg-canvas p-1 sm:p-3 print:!p-0">
             <BiodataPreview data={data} templateId={templateId} />
