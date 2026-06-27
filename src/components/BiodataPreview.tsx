@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { getTemplate } from "./templates";
 import type { Biodata } from "@/data/biodata";
 
-// A4 in CSS pixels at 96 DPI.
 const A4_W = 793.7;
-const A4_H = 1122.5;
 
 export default function BiodataPreview({ data, templateId }: { data: Biodata; templateId: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [innerH, setInnerH] = useState(0);
 
-  // Fit-to-width for the on-screen preview only (print is handled by CSS).
+  // Fit-to-width on screen.
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -23,16 +23,28 @@ export default function BiodataPreview({ data, templateId }: { data: Biodata; te
     return () => ro.disconnect();
   }, []);
 
+  // Track the (multi-page) document height so the scaled wrapper reserves space.
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const update = () => setInnerH(el.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [data, templateId]);
+
   const { Component } = getTemplate(templateId);
 
   return (
     <div ref={wrapRef} className="w-full print:!block">
       <div
-        style={{ width: A4_W * scale, height: A4_H * scale }}
+        style={{ width: A4_W * scale, height: innerH * scale }}
         className="relative mx-auto print:!static print:!m-0 print:!h-auto print:!w-auto"
       >
         <div
           id="print-area"
+          ref={innerRef}
           style={{
             width: A4_W,
             transform: `scale(${scale})`,
@@ -41,7 +53,6 @@ export default function BiodataPreview({ data, templateId }: { data: Biodata; te
             top: 0,
             left: 0,
           }}
-          className="shadow-2xl ring-1 ring-black/5"
         >
           <Component data={data} />
         </div>

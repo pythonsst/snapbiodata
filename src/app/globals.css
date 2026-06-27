@@ -40,13 +40,24 @@ body {
   background: #fff;
 }
 
+/* On screen, show each page as a card with a gap between pages. */
+@media screen {
+  .a4 {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+  .a4 + .a4 {
+    margin-top: 18px;
+  }
+}
+
 /* Thin custom scrollbar for the form panel */
 .scroll-slim::-webkit-scrollbar { width: 8px; }
 .scroll-slim::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
 .scroll-slim::-webkit-scrollbar-thumb:hover { background: #d9cdc2; }
 
-/* Decorative page frame: sits within the A4 card on screen, and REPEATS on
-   every page in print (position: fixed) so multi-page PDFs are framed alike. */
+/* Decorative page frame: absolute inside its own A4 page. Each page is a
+   self-contained framed .a4 block (see FramedDoc), so the frame is naturally
+   present on every page. */
 .bio-frame {
   position: absolute;
   inset: 0;
@@ -54,15 +65,14 @@ body {
 }
 
 /* ============================================================
-   PRINT — only the biodata prints; the frame repeats per page.
+   PRINT — each .a4 prints as one sheet (frame included).
    ============================================================ */
 @media print {
   @page {
     size: A4;
-    /* Top/bottom give continuation pages clearance from the frame in real
-       browsers (honored on Ctrl+P). Sides are handled by each template's own
-       print padding so the result is consistent even where @page is ignored. */
-    margin: 14mm 0;
+    /* 0 margin → the browser has no room to inject its date/title/URL/page-number
+       header & footer, so the PDF stays clean. */
+    margin: 0;
   }
   body * {
     visibility: hidden;
@@ -71,31 +81,17 @@ body {
   #print-area * {
     visibility: visible;
   }
-  /* Let the biodata flow in normal document flow so @page margins give each
-     page consistent insets and the content paginates cleanly. */
+  /* Flow the stacked .a4 pages naturally; each one is exactly an A4 sheet. */
   #print-area {
     position: static !important;
     transform: none !important;
-    width: auto !important;
+    width: 210mm !important;
     margin: 0 !important;
     box-shadow: none !important;
   }
-  .a4 {
-    width: auto !important;
-    min-height: 0 !important;
-  }
-  /* The frame becomes fixed → painted on every page, at the page edge. */
-  .bio-frame {
-    position: fixed !important;
-    inset: 0 !important;
-  }
-  /* Safety nets: never split a label/value row; keep headings with their rows. */
-  #print-area dl > div,
-  #print-area section {
+  /* Never split a single label/value row across a page. */
+  #print-area dl > div {
     break-inside: avoid;
-  }
-  #print-area h2 {
-    break-after: avoid;
   }
   .no-print {
     display: none !important;
