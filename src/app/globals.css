@@ -89,14 +89,7 @@ body {
     margin: 0 !important;
     box-shadow: none !important;
   }
-  /* iOS WebKit (iPhone Safari/Chrome) doesn't reliably honour @page margin:0,
-     so a block forced to a full 297mm min-height overflows the printable area
-     and emits a blank sheet after each page — turning 2 pages into 4. In print,
-     let each .a4 be only as tall as its content and rely on `break-after: page`
-     (set per-page by FramedDoc) to start each page on a fresh sheet. */
   .a4 {
-    min-height: 0 !important;
-    height: auto !important;
     box-shadow: none !important;
   }
   /* Never split a single label/value row across a page. */
