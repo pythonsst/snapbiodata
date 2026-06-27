@@ -85,7 +85,7 @@ export default function BiodataForm({ data, onChange }: Props) {
         id="photo"
         title="Photo & Heading"
         badge={`${(data.photo ? 1 : 0) + (data.header.trim() ? 1 : 0)}/2`}
-        open={open.photo}
+        open={!!open.photo}
         onToggle={toggle}
       >
         <div className="flex items-center gap-4">

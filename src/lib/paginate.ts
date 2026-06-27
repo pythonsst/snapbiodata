@@ -64,6 +64,7 @@ export function paginate(units: Unit[], opts: PaginateOptions): Unit[][] {
 
   for (let i = 0; i < units.length; i++) {
     const u = units[i];
+    if (!u) continue;
     const uh = (heights[i] || 0) + gapFor(u, gaps);
 
     if (u.type === "heading") {
@@ -80,8 +81,9 @@ export function paginate(units: Unit[], opts: PaginateOptions): Unit[][] {
         flush();
         // Repeat the section heading at the top of the continuation page.
         const hi = units.findIndex((x) => x.type === "heading" && x.s === u.s);
-        if (hi >= 0) {
-          cur.push(units[hi]);
+        const headingUnit = hi >= 0 ? units[hi] : undefined;
+        if (headingUnit) {
+          cur.push(headingUnit);
           h += (heights[hi] || 0) + gaps.heading;
         }
       }
