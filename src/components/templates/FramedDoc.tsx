@@ -118,6 +118,8 @@ export default function FramedDoc(props: FramedDocProps) {
       }
     }
     flush();
+    // Derived layout from measured DOM — setting state here is intentional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPages(pgs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, padTop, padBottom, padX]);
