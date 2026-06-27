@@ -5,16 +5,25 @@
  * Field `key`s are unique across all sections so a flat `values` map is enough.
  */
 
-export type FieldType = "text" | "date" | "time" | "tel" | "email" | "select" | "textarea";
+export type FieldType = "text" | "date" | "time" | "tel" | "email" | "select" | "textarea" | "combo";
 
 export interface FieldDef {
   key: string;
   label: string;
   type?: FieldType;
   placeholder?: string;
-  /** Options for a `select` field. */
+  /** Choices for a `select` (fixed) or `combo` (suggestions you can also type past) field. */
   options?: string[];
 }
+
+/** Common heights (4'6"–6'6") for the Height field; users can also type their own. */
+export const heightOptions: string[] = Array.from({ length: 25 }, (_, i) => {
+  const totalInches = 54 + i; // 4'6" … 6'6"
+  const ft = Math.floor(totalInches / 12);
+  const inch = totalInches % 12;
+  const cm = Math.round(totalInches * 2.54);
+  return `${ft}'${inch}" (${cm} cm)`;
+});
 
 export interface SectionDef {
   id: string;
@@ -31,7 +40,7 @@ export const biodataSections: SectionDef[] = [
       { key: "dob", label: "Date of Birth", type: "date" },
       { key: "tob", label: "Time of Birth", type: "time" },
       { key: "pob", label: "Place of Birth", placeholder: "City, State" },
-      { key: "height", label: "Height", placeholder: `e.g. 5'10" (178 cm)` },
+      { key: "height", label: "Height", type: "combo", options: heightOptions, placeholder: `Select or type, e.g. 5'10" (178 cm)` },
       {
         key: "complexion",
         label: "Complexion",
