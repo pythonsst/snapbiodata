@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/* ============================================================
+   SHAADI BIODATA MAKER — design tokens
+   Warm wedding palette: maroon + gold on a soft canvas.
+   ============================================================ */
+@theme inline {
+  --color-canvas: #faf6f2;      /* app background */
+  --color-surface: #ffffff;     /* cards / panels */
+  --color-ink: #2a2025;         /* primary text */
+  --color-muted: #7c7077;       /* secondary text */
+  --color-line: #ece3da;        /* borders */
+
+  --color-maroon: #9b1c3a;      /* primary accent */
+  --color-maroon-dark: #7d1530;
+  --color-gold: #c79a3a;        /* secondary accent */
+  --color-gold-soft: #f3e7c8;
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* The biodata document uses serif fonts. */
+.doc {
+  font-family: var(--font-serif);
+}
+.doc-display {
+  font-family: var(--font-display);
+}
+
+/* A4 page: 210mm × 297mm. Scaled to fit the preview column via transform. */
+.a4 {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+}
+
+/* Thin custom scrollbar for the form panel */
+.scroll-slim::-webkit-scrollbar { width: 8px; }
+.scroll-slim::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
+.scroll-slim::-webkit-scrollbar-thumb:hover { background: #d9cdc2; }
+
+/* ============================================================
+   PRINT — only the biodata page prints (A4), nothing else.
+   ============================================================ */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  /* Reset preview scaling for print so it fills the A4 page. */
+  #print-area {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 210mm !important;
+    height: auto !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
