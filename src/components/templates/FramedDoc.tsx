@@ -1,78 +1,124 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { renderedSections, type RenderedSection } from "./shared";
+import { renderedSections, type RenderedRow, type RenderedSection } from "./shared";
 import type { Biodata } from "@/data/biodata";
 
 const MM = 3.779527559; // px per mm @96dpi
 const A4_W = 793.7;
 const A4_H = 1122.5;
 
+// Spacing (px) added between units; counted in packing and applied on render.
+const HEADER_GAP = 16; // below the page-1 header
+const SECTION_GAP = 18; // above a section heading (unless it starts a page)
+const HEADING_GAP = 10; // below a heading, before its first row
+const ROW_GAP = 6; // below each row
+const BUFFER = 10; // safety so a too-tall page never forces a browser split
+
+type Unit =
+  | { type: "header" }
+  | { type: "heading"; s: number }
+  | { type: "row"; s: number; r: number }
+  | { type: "section"; s: number }; // atomic mode
+
 export interface FramedDocProps {
   data: Biodata;
-  /** Page background colour. */
   bg?: string;
-  /** Content padding in mm. */
   padX: number;
   padTop: number;
   padBottom: number;
-  /** Decorative frame for one page; receives the page index for unique ids. */
   frame: (pageIndex: number) => ReactNode;
-  /** Page-1 header block (name / photo / invocation). */
   header?: ReactNode;
-  /** Render one section (heading + rows). Kept whole on a page. */
-  renderSection: (section: RenderedSection) => ReactNode;
+  /** Row-level mode (fills pages, splits long sections, repeats the heading). */
+  renderHeading?: (title: string) => ReactNode;
+  renderRow?: (row: RenderedRow) => ReactNode;
+  /** Atomic mode — keep each whole section together (e.g. 2-column layouts). */
+  renderSection?: (section: RenderedSection) => ReactNode;
 }
 
 /**
  * Splits a biodata into self-contained, individually-framed A4 pages by
- * measuring each block. This makes multi-page PDFs reliable across every print
- * engine — each printed sheet is one complete framed page.
+ * measuring each unit. Every printed sheet is one complete framed page, and
+ * pages fill tightly (sections continue across a break with the heading
+ * repeated). Works the same in every print engine.
  */
-export default function FramedDoc({
-  data,
-  bg = "#ffffff",
-  padX,
-  padTop,
-  padBottom,
-  frame,
-  header,
-  renderSection,
-}: FramedDocProps) {
+export default function FramedDoc(props: FramedDocProps) {
+  const { data, bg = "#ffffff", padX, padTop, padBottom, frame, header } = props;
   const sections = renderedSections(data);
+  const rowLevel = Boolean(props.renderHeading && props.renderRow);
 
-  const blocks: { key: string; node: ReactNode }[] = [];
-  if (header) blocks.push({ key: "__header", node: header });
-  for (const s of sections) blocks.push({ key: s.id, node: renderSection(s) });
+  // Build the ordered unit list.
+  const units: Unit[] = [];
+  if (header) units.push({ type: "header" });
+  sections.forEach((s, si) => {
+    if (rowLevel) {
+      units.push({ type: "heading", s: si });
+      s.rows.forEach((_, ri) => units.push({ type: "row", s: si, r: ri }));
+    } else {
+      units.push({ type: "section", s: si });
+    }
+  });
 
-  const measRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [pages, setPages] = useState<number[][] | null>(null);
+  const nodeFor = (u: Unit): ReactNode => {
+    if (u.type === "header") return header;
+    if (u.type === "section") return props.renderSection!(sections[u.s]);
+    if (u.type === "heading") return props.renderHeading!(sections[u.s].title);
+    return props.renderRow!(sections[u.s].rows[u.r]);
+  };
+  const gapFor = (u: Unit): number =>
+    u.type === "header" ? HEADER_GAP : u.type === "heading" ? HEADING_GAP : u.type === "row" ? ROW_GAP : SECTION_GAP;
 
-  // Vertical gap rendered between blocks; counted in packing so measured heights
-  // (which exclude margins) stay accurate.
-  const GAP = 24;
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const [pages, setPages] = useState<Unit[][] | null>(null);
 
-  const sig = JSON.stringify(data.values) + (data.photo ? "1" : "0") + data.header;
+  const sig = JSON.stringify(data.values) + (data.photo ? "1" : "0") + data.header + rowLevel;
   useLayoutEffect(() => {
-    // A small safety buffer prevents a block that's a hair too tall from making
-    // the browser split a page in two.
-    const contentPx = A4_H - (padTop + padBottom) * MM - 8;
-    const heights = measRefs.current.map((el) => (el ? el.offsetHeight : 0));
-    const result: number[][] = [];
-    let cur: number[] = [];
+    const contentPx = A4_H - (padTop + padBottom) * MM - BUFFER;
+    const H = refs.current.map((el) => (el ? el.offsetHeight : 0));
+    const pgs: Unit[][] = [];
+    let cur: Unit[] = [];
     let h = 0;
-    blocks.forEach((_, i) => {
-      const bh = (heights[i] || 0) + GAP;
-      if (cur.length && h + bh > contentPx) {
-        result.push(cur);
+    const flush = () => {
+      if (cur.length) {
+        pgs.push(cur);
         cur = [];
         h = 0;
       }
-      cur.push(i);
-      h += bh;
-    });
-    if (cur.length) result.push(cur);
-    setPages(result);
+    };
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      const uh = (H[i] || 0) + gapFor(u);
+
+      if (u.type === "heading") {
+        const next = units[i + 1];
+        const firstRowH = next && next.type === "row" ? (H[i + 1] || 0) + ROW_GAP : 0;
+        const topGap = cur.length ? SECTION_GAP : 0;
+        // Don't strand a heading at the bottom: it must fit with its first row.
+        if (cur.length && h + topGap + uh + firstRowH > contentPx) flush();
+        h += cur.length ? SECTION_GAP : 0;
+        cur.push(u);
+        h += uh;
+      } else if (u.type === "row") {
+        if (cur.length && h + uh > contentPx) {
+          flush();
+          // Repeat the section heading at the top of the continuation page.
+          const hi = units.findIndex((x) => x.type === "heading" && x.s === u.s);
+          if (hi >= 0) {
+            cur.push(units[hi]);
+            h += (H[hi] || 0) + HEADING_GAP;
+          }
+        }
+        cur.push(u);
+        h += uh;
+      } else {
+        // header or atomic section
+        if (cur.length && h + uh > contentPx) flush();
+        cur.push(u);
+        h += uh;
+      }
+    }
+    flush();
+    setPages(pgs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, padTop, padBottom, padX]);
 
@@ -83,7 +129,7 @@ export default function FramedDoc({
     paddingBottom: `${padBottom}mm`,
   };
 
-  const laidOut = pages ?? [blocks.map((_, i) => i)];
+  const laid = pages ?? [units];
 
   return (
     <>
@@ -92,29 +138,35 @@ export default function FramedDoc({
         aria-hidden
         style={{ position: "absolute", left: -99999, top: 0, width: A4_W - 2 * padX * MM, visibility: "hidden" }}
       >
-        {blocks.map((b, i) => (
+        {units.map((u, i) => (
           <div
-            key={b.key}
+            key={i}
             ref={(el) => {
-              measRefs.current[i] = el;
+              refs.current[i] = el;
             }}
           >
-            {b.node}
+            {nodeFor(u)}
           </div>
         ))}
       </div>
 
-      {laidOut.map((pageBlocks, pi) => (
+      {laid.map((pageUnits, pi) => (
         <div
           key={pi}
           className="a4 doc relative"
-          style={{ background: bg, breakAfter: pi < laidOut.length - 1 ? "page" : "auto" }}
+          style={{ background: bg, breakAfter: pi < laid.length - 1 ? "page" : "auto" }}
         >
           {frame(pi)}
           <div className="relative" style={contentStyle}>
-            {pageBlocks.map((bi) => (
-              <div key={blocks[bi].key} style={{ marginBottom: GAP }}>
-                {blocks[bi].node}
+            {pageUnits.map((u, j) => (
+              <div
+                key={`${pi}-${j}`}
+                style={{
+                  marginTop: u.type === "heading" && j > 0 ? SECTION_GAP : 0,
+                  marginBottom: gapFor(u),
+                }}
+              >
+                {nodeFor(u)}
               </div>
             ))}
           </div>

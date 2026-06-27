@@ -1,5 +1,5 @@
 import FramedDoc from "./FramedDoc";
-import { displayName, type RenderedSection, type TemplateProps } from "./shared";
+import { displayName, type RenderedRow, type TemplateProps } from "./shared";
 import { CornerFloral, OmMark, Sprig } from "./ornaments";
 
 /**
@@ -44,24 +44,21 @@ export default function FloralTemplate({ data }: TemplateProps) {
     </div>
   );
 
-  const renderSection = (section: RenderedSection) => (
-    <section className="text-[#4a3b22]">
-      <h2 className="doc-display mb-3 flex items-center gap-3 text-[15px] font-semibold uppercase tracking-wide text-[#8a2b2b]">
-        <span>{section.title}</span>
-        <span className="h-px flex-1 bg-[#c79a3a]/50" />
-      </h2>
-      <dl className="space-y-1.5">
-        {section.rows.map((row) => (
-          <div key={row.label} className="flex gap-3 text-[13px] leading-relaxed">
-            <dt className="w-[38%] shrink-0 font-semibold text-[#6b5836]">{row.label}</dt>
-            <dd className="flex-1">
-              <span className="mr-2 text-[#b8893a]">:</span>
-              {row.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </section>
+  const renderHeading = (title: string) => (
+    <h2 className="doc-display flex items-center gap-3 text-[15px] font-semibold uppercase tracking-wide text-[#8a2b2b]">
+      <span>{title}</span>
+      <span className="h-px flex-1 bg-[#c79a3a]/50" />
+    </h2>
+  );
+
+  const renderRow = (row: RenderedRow) => (
+    <div className="flex gap-3 text-[13px] leading-relaxed text-[#4a3b22]">
+      <div className="w-[38%] shrink-0 font-semibold text-[#6b5836]">{row.label}</div>
+      <div className="flex-1">
+        <span className="mr-2 text-[#b8893a]">:</span>
+        {row.value}
+      </div>
+    </div>
   );
 
   return (
@@ -73,7 +70,8 @@ export default function FloralTemplate({ data }: TemplateProps) {
       padBottom={20}
       frame={frame}
       header={header}
-      renderSection={renderSection}
+      renderHeading={renderHeading}
+      renderRow={renderRow}
     />
   );
 }

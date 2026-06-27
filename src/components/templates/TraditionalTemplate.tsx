@@ -1,5 +1,5 @@
 import FramedDoc from "./FramedDoc";
-import { displayName, type RenderedSection, type TemplateProps } from "./shared";
+import { displayName, type RenderedRow, type TemplateProps } from "./shared";
 
 /**
  * Traditional template — classic maroon & gold framed biodata. Each page is a
@@ -35,24 +35,21 @@ export default function TraditionalTemplate({ data }: TemplateProps) {
     </div>
   );
 
-  const renderSection = (section: RenderedSection) => (
-    <section>
-      <h2 className="doc-display mb-3 flex items-center gap-3 text-[16px] font-semibold uppercase tracking-wide text-maroon">
-        <span>{section.title}</span>
-        <span className="h-px flex-1 bg-gold/60" />
-      </h2>
-      <dl className="space-y-1.5">
-        {section.rows.map((row) => (
-          <div key={row.label} className="flex gap-3 text-[13.5px] leading-relaxed">
-            <dt className="w-[38%] shrink-0 font-semibold text-ink/80">{row.label}</dt>
-            <dd className="flex-1 text-ink">
-              <span className="mr-2 text-muted">:</span>
-              {row.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </section>
+  const renderHeading = (title: string) => (
+    <h2 className="doc-display flex items-center gap-3 text-[16px] font-semibold uppercase tracking-wide text-maroon">
+      <span>{title}</span>
+      <span className="h-px flex-1 bg-gold/60" />
+    </h2>
+  );
+
+  const renderRow = (row: RenderedRow) => (
+    <div className="flex gap-3 text-[13.5px] leading-relaxed">
+      <div className="w-[38%] shrink-0 font-semibold text-ink/80">{row.label}</div>
+      <div className="flex-1 text-ink">
+        <span className="mr-2 text-muted">:</span>
+        {row.value}
+      </div>
+    </div>
   );
 
   return (
@@ -64,7 +61,8 @@ export default function TraditionalTemplate({ data }: TemplateProps) {
       padBottom={20}
       frame={frame}
       header={header}
-      renderSection={renderSection}
+      renderHeading={renderHeading}
+      renderRow={renderRow}
     />
   );
 }
