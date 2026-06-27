@@ -134,7 +134,10 @@ export default function FramedDoc(props: FramedDocProps) {
         <div
           key={pi}
           className="a4 doc relative"
-          style={{ background: bg, breakAfter: pi < laid.length - 1 ? "page" : "auto" }}
+          // break-BEFORE each page after the first. iOS WebKit inserts a blank
+          // sheet at `break-after: page`, so we force the next page onto a fresh
+          // sheet from its own leading edge instead — no trailing blank page.
+          style={{ background: bg, breakBefore: pi > 0 ? "page" : "auto" }}
         >
           {frame(pi)}
           <div className="relative" style={contentStyle}>
