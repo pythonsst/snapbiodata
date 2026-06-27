@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Playfair_Display, Lora } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/config";
 import "./globals.css";
 
@@ -66,7 +67,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${playfair.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-canvas text-ink">{children}</body>
+      <body className="min-h-full flex flex-col bg-canvas text-ink">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
