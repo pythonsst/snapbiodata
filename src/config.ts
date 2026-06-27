@@ -5,6 +5,8 @@ export const SITE = {
   description:
     "Create a beautiful marriage biodata in minutes — pick a template, fill your details, add a photo, then download a print-ready PDF or share a private link. 100% free and open source.",
   github: "https://github.com/pythonsst/snapbiodata",
+  /** Where users can reach a human when something goes wrong. */
+  contactEmail: "pythonsst@gmail.com",
 };
 
 /** Voluntary support / donation settings shown in the share dialog. */

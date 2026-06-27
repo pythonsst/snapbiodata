@@ -3,13 +3,17 @@
 import { useState, type ChangeEvent, type ReactNode } from "react";
 import {
   biodataSections,
+  filledCount,
   headerPresets,
   emptyBiodata,
   sampleBiodata,
   type Biodata,
   type FieldDef,
-  type SectionDef,
 } from "@/data/biodata";
+import { ChevronDownIcon } from "@/components/ui/icons";
+
+/** Copy a Biodata so component state never aliases the shared module singletons. */
+const clone = (b: Biodata): Biodata => ({ ...b, values: { ...b.values } });
 
 interface Props {
   data: Biodata;
@@ -50,8 +54,6 @@ export default function BiodataForm({ data, onChange }: Props) {
     reader.readAsDataURL(file);
   };
 
-  const filled = (s: SectionDef) => s.fields.filter((f) => (data.values[f.key] ?? "").trim()).length;
-
   return (
     <div className="space-y-3">
       {/* Toolbar */}
@@ -60,7 +62,7 @@ export default function BiodataForm({ data, onChange }: Props) {
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => onChange(sampleBiodata)}
+            onClick={() => onChange(clone(sampleBiodata))}
             className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink hover:border-maroon hover:text-maroon"
           >
             Load sample
@@ -69,7 +71,7 @@ export default function BiodataForm({ data, onChange }: Props) {
             type="button"
             onClick={() => {
               setPhotoError("");
-              onChange({ ...emptyBiodata });
+              onChange(clone(emptyBiodata));
             }}
             className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink hover:border-maroon hover:text-maroon"
           >
@@ -143,7 +145,7 @@ export default function BiodataForm({ data, onChange }: Props) {
           key={section.id}
           id={section.id}
           title={section.title}
-          badge={`${filled(section)}/${section.fields.length}`}
+          badge={`${filledCount(section, data.values)}/${section.fields.length}`}
           open={!!open[section.id]}
           onToggle={toggle}
         >
@@ -189,14 +191,7 @@ function Accordion({
         <span className="text-sm font-semibold uppercase tracking-wider text-maroon">{title}</span>
         <span className="flex items-center gap-2.5">
           <span className="rounded-full bg-canvas px-2 py-0.5 text-[11px] font-medium text-muted">{badge}</span>
-          <svg
-            className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <ChevronDownIcon className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
       {open && <div className="border-t border-line p-4">{children}</div>}

@@ -173,6 +173,16 @@ export const sampleBiodata: Biodata = {
   },
 };
 
+/** Whether a field has a meaningful (non-blank) value. */
+export function isFieldFilled(field: FieldDef, values: Record<string, string>): boolean {
+  return (values[field.key] ?? "").trim().length > 0;
+}
+
+/** How many fields in a section the user has filled in — drives the form badges. */
+export function filledCount(section: SectionDef, values: Record<string, string>): number {
+  return section.fields.filter((field) => isFieldFilled(field, values)).length;
+}
+
 /** Helper: format a value for display (e.g. nice date). Empty stays empty. */
 export function formatValue(field: FieldDef, value: string | undefined): string {
   if (!value) return "";

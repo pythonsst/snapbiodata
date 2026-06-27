@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getTemplate } from "./templates";
+import { A4_W } from "@/lib/a4";
 import type { Biodata } from "@/data/biodata";
-
-const A4_W = 793.7;
 
 export default function BiodataPreview({ data, templateId }: { data: Biodata; templateId: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);

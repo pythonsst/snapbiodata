@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import BiodataForm from "@/components/BiodataForm";
 import BiodataPreview from "@/components/BiodataPreview";
 import TemplatePicker from "@/components/TemplatePicker";
 import SupportDialog from "@/components/SupportDialog";
+import Button from "@/components/ui/Button";
+import { ArrowRightIcon, DownloadIcon } from "@/components/ui/icons";
 import { defaultTemplateId, getTemplate } from "@/components/templates";
 import { sampleBiodata, type Biodata } from "@/data/biodata";
 
@@ -23,30 +25,27 @@ export default function CreatePage() {
     }
   }, []);
 
-  const handleDownload = () => window.print();
+  // Print is synchronous and blocks the main thread, so we (a) keep it out of the
+  // click handler for a snappy interaction, and (b) switch to the preview tab
+  // first — on mobile the preview may be on the hidden tab, where it measures 0
+  // and paginates wrong. Deferring lets it become visible and re-paginate first.
+  const handleDownload = useCallback(() => {
+    setMobileTab("preview");
+    window.setTimeout(() => window.print(), 150);
+  }, []);
 
   const downloadBtn = (cls = "") => (
-    <button
-      onClick={handleDownload}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-maroon hover:text-maroon ${cls}`}
-    >
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-      </svg>
+    <Button variant="secondary" className={cls} onClick={handleDownload}>
+      <DownloadIcon />
       Download PDF
-    </button>
+    </Button>
   );
 
   const publishBtn = (cls = "") => (
-    <button
-      onClick={() => setShowPublish(true)}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg bg-maroon px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-maroon-dark ${cls}`}
-    >
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-      </svg>
+    <Button variant="primary" className={cls} onClick={() => setShowPublish(true)}>
+      <ArrowRightIcon />
       Share
-    </button>
+    </Button>
   );
 
   return (
@@ -89,7 +88,7 @@ export default function CreatePage() {
       <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 px-3 pb-24 pt-4 sm:px-6 sm:pb-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:min-h-0 lg:overflow-hidden print:!block print:!p-0">
         {/* Controls */}
         <div
-          className={`no-print space-y-5 ${mobileTab === "edit" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto lg:pb-6 lg:pr-2`}
+          className={`no-print space-y-5 ${mobileTab === "edit" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto lg:pb-6 lg:pr-2 scroll-slim`}
         >
           <div>
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-maroon">Choose a template</h2>
@@ -100,7 +99,7 @@ export default function CreatePage() {
 
         {/* Preview (always printable; visible per tab on mobile) */}
         <div
-          className={`${mobileTab === "preview" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto print:!block`}
+          className={`${mobileTab === "preview" ? "block" : "hidden"} lg:block lg:min-h-0 lg:overflow-y-auto print:!block scroll-slim`}
         >
           <div className="rounded-xl bg-canvas p-1 sm:p-3 print:!p-0">
             <BiodataPreview data={data} templateId={templateId} />

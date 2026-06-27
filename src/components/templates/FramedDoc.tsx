@@ -1,25 +1,19 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { renderedSections, type RenderedRow, type RenderedSection } from "./shared";
+import { MM, A4_W, A4_H } from "@/lib/a4";
+import { paginate, type Gaps, type Unit } from "@/lib/paginate";
 import type { Biodata } from "@/data/biodata";
 
-const MM = 3.779527559; // px per mm @96dpi
-const A4_W = 793.7;
-const A4_H = 1122.5;
-
 // Spacing (px) added between units; counted in packing and applied on render.
-const HEADER_GAP = 16; // below the page-1 header
-const SECTION_GAP = 18; // above a section heading (unless it starts a page)
-const HEADING_GAP = 10; // below a heading, before its first row
-const ROW_GAP = 6; // below each row
+const GAPS: Gaps = {
+  header: 16, // below the page-1 header
+  section: 18, // above a section heading (unless it starts a page)
+  heading: 10, // below a heading, before its first row
+  row: 6, // below each row
+};
 const BUFFER = 10; // safety so a too-tall page never forces a browser split
-
-type Unit =
-  | { type: "header" }
-  | { type: "heading"; s: number }
-  | { type: "row"; s: number; r: number }
-  | { type: "section"; s: number }; // atomic mode
 
 export interface FramedDocProps {
   data: Biodata;
@@ -65,64 +59,34 @@ export default function FramedDoc(props: FramedDocProps) {
     if (u.type === "heading") return props.renderHeading!(sections[u.s].title);
     return props.renderRow!(sections[u.s].rows[u.r]);
   };
-  const gapFor = (u: Unit): number =>
-    u.type === "header" ? HEADER_GAP : u.type === "heading" ? HEADING_GAP : u.type === "row" ? ROW_GAP : SECTION_GAP;
 
   const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const measureRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<Unit[][] | null>(null);
+  // Bumped whenever the measurer's box changes size (e.g. the preview goes from
+  // display:none → visible on mobile), forcing a re-measure + re-paginate.
+  const [visibilityTick, setVisibilityTick] = useState(0);
 
   const sig = JSON.stringify(data.values) + (data.photo ? "1" : "0") + data.header + rowLevel;
+
   useLayoutEffect(() => {
     const contentPx = A4_H - (padTop + padBottom) * MM - BUFFER;
-    const H = refs.current.map((el) => (el ? el.offsetHeight : 0));
-    const pgs: Unit[][] = [];
-    let cur: Unit[] = [];
-    let h = 0;
-    const flush = () => {
-      if (cur.length) {
-        pgs.push(cur);
-        cur = [];
-        h = 0;
-      }
-    };
-    for (let i = 0; i < units.length; i++) {
-      const u = units[i];
-      const uh = (H[i] || 0) + gapFor(u);
-
-      if (u.type === "heading") {
-        const next = units[i + 1];
-        const firstRowH = next && next.type === "row" ? (H[i + 1] || 0) + ROW_GAP : 0;
-        const topGap = cur.length ? SECTION_GAP : 0;
-        // Don't strand a heading at the bottom: it must fit with its first row.
-        if (cur.length && h + topGap + uh + firstRowH > contentPx) flush();
-        h += cur.length ? SECTION_GAP : 0;
-        cur.push(u);
-        h += uh;
-      } else if (u.type === "row") {
-        if (cur.length && h + uh > contentPx) {
-          flush();
-          // Repeat the section heading at the top of the continuation page.
-          const hi = units.findIndex((x) => x.type === "heading" && x.s === u.s);
-          if (hi >= 0) {
-            cur.push(units[hi]);
-            h += (H[hi] || 0) + HEADING_GAP;
-          }
-        }
-        cur.push(u);
-        h += uh;
-      } else {
-        // header or atomic section
-        if (cur.length && h + uh > contentPx) flush();
-        cur.push(u);
-        h += uh;
-      }
-    }
-    flush();
+    const heights = refs.current.map((el) => (el ? el.offsetHeight : 0));
+    // A hidden ancestor measures every unit as 0 — don't paginate from garbage.
+    if (heights.every((v) => v === 0) && units.length > 0) return;
     // Derived layout from measured DOM — setting state here is intentional.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPages(pgs);
+    setPages(paginate(units, { contentPx, heights, gaps: GAPS }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sig, padTop, padBottom, padX]);
+  }, [sig, padTop, padBottom, padX, visibilityTick]);
+
+  // Re-paginate when the measurer becomes visible or changes size.
+  useEffect(() => {
+    const el = measureRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setVisibilityTick((t) => t + 1));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const contentStyle = {
     paddingLeft: `${padX}mm`,
@@ -137,13 +101,13 @@ export default function FramedDoc(props: FramedDocProps) {
     <>
       {/* Hidden measurer — wrapped in a 0×0 clip so it never affects page width. */}
       <div aria-hidden style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
-        <div style={{ width: A4_W - 2 * padX * MM }}>
+        <div ref={measureRef} style={{ width: A4_W - 2 * padX * MM }}>
           {units.map((u, i) => (
-          <div
-            key={i}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
+            <div
+              key={i}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
             >
               {nodeFor(u)}
             </div>
@@ -163,8 +127,8 @@ export default function FramedDoc(props: FramedDocProps) {
               <div
                 key={`${pi}-${j}`}
                 style={{
-                  marginTop: u.type === "heading" && j > 0 ? SECTION_GAP : 0,
-                  marginBottom: gapFor(u),
+                  marginTop: u.type === "heading" && j > 0 ? GAPS.section : 0,
+                  marginBottom: gapForRender(u),
                 }}
               >
                 {nodeFor(u)}
@@ -175,4 +139,14 @@ export default function FramedDoc(props: FramedDocProps) {
       ))}
     </>
   );
+}
+
+function gapForRender(u: Unit): number {
+  return u.type === "header"
+    ? GAPS.header
+    : u.type === "heading"
+      ? GAPS.heading
+      : u.type === "row"
+        ? GAPS.row
+        : GAPS.section;
 }

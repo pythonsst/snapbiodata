@@ -1,18 +1,22 @@
 "use client";
 
+import { memo } from "react";
 import { templates } from "@/components/templates";
 import { sampleBiodata } from "@/data/biodata";
+import { A4_W, A4_RATIO } from "@/lib/a4";
 
-const A4_W = 793.7;
 const THUMB_W = 116; // px
 const SCALE = THUMB_W / A4_W;
-const THUMB_H = THUMB_W * 1.414; // A4 ratio
 
 /**
  * Visual template picker — each option is a real, scaled-down render of the
  * template (with sample data) so people choose by look, like Canva.
+ *
+ * Memoised: the create page re-renders on every keystroke, but the picker only
+ * depends on `templateId`/`onSelect`, so without this it would needlessly
+ * re-render five full template documents per keypress.
  */
-export default function TemplatePicker({
+function TemplatePicker({
   templateId,
   onSelect,
 }: {
@@ -38,7 +42,7 @@ export default function TemplatePicker({
                   ? "border-maroon ring-2 ring-maroon/25"
                   : "border-line group-hover:border-maroon/40"
               }`}
-              style={{ width: "100%", aspectRatio: "1 / 1.414" }}
+              style={{ width: "100%", aspectRatio: `1 / ${A4_RATIO}` }}
             >
               <div
                 aria-hidden
@@ -69,5 +73,4 @@ export default function TemplatePicker({
   );
 }
 
-// Keep the thumbnail height constant available if needed by callers.
-export const TEMPLATE_THUMB_HEIGHT = THUMB_H;
+export default memo(TemplatePicker);
