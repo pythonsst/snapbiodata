@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { SUPPORT } from "@/config";
 
-// Creator's UPI ID for voluntary support.
-const UPI_ID = "pythonshiv@ybl";
-const PAYEE = "SnapBiodata";
-const AMOUNTS = [29, 49, 99];
+const UPI_ID = SUPPORT.upiId;
+const AMOUNTS = SUPPORT.amounts;
 
 function upiLink(amount: number) {
   const p = new URLSearchParams({
-    pa: UPI_ID,
-    pn: PAYEE,
+    pa: SUPPORT.upiId,
+    pn: SUPPORT.payeeName,
     cu: "INR",
-    tn: "Support SnapBiodata",
+    tn: `Support ${SUPPORT.payeeName}`,
   });
   if (amount) p.set("am", String(amount));
   return `upi://pay?${p.toString()}`;

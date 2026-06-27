@@ -17,7 +17,18 @@ export default function BiodataForm({ data, onChange }: Props) {
   const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Please choose an image file (JPG, PNG, etc.).");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert("That image is too large — please use one under 12 MB.");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
+    reader.onerror = () => alert("Sorry, that image couldn't be loaded. Please try another.");
     reader.onload = () => onChange({ ...data, photo: String(reader.result) });
     reader.readAsDataURL(file);
   };
