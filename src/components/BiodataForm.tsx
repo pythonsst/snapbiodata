@@ -1,6 +1,6 @@
 "use client";
 
-import { type ChangeEvent } from "react";
+import { useState, type ChangeEvent } from "react";
 import { biodataSections, headerPresets, type Biodata, type FieldDef } from "@/data/biodata";
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export default function BiodataForm({ data, onChange }: Props) {
+  const [photoError, setPhotoError] = useState("");
+
   const setValue = (key: string, value: string) =>
     onChange({ ...data, values: { ...data.values, [key]: value } });
 
@@ -17,18 +19,19 @@ export default function BiodataForm({ data, onChange }: Props) {
   const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPhotoError("");
     if (!file.type.startsWith("image/")) {
-      alert("Please choose an image file (JPG, PNG, etc.).");
+      setPhotoError("Please choose an image file (JPG, PNG, etc.).");
       e.target.value = "";
       return;
     }
     if (file.size > 12 * 1024 * 1024) {
-      alert("That image is too large — please use one under 12 MB.");
+      setPhotoError("That image is too large — please use one under 12 MB.");
       e.target.value = "";
       return;
     }
     const reader = new FileReader();
-    reader.onerror = () => alert("Sorry, that image couldn't be loaded. Please try another.");
+    reader.onerror = () => setPhotoError("Sorry, that image couldn't be loaded. Please try another.");
     reader.onload = () => onChange({ ...data, photo: String(reader.result) });
     reader.readAsDataURL(file);
   };
@@ -65,6 +68,7 @@ export default function BiodataForm({ data, onChange }: Props) {
               </button>
             )}
             <p className="text-xs text-muted">Kept on your device — only uploaded if you publish a link.</p>
+            {photoError && <p className="text-xs font-medium text-red-600">{photoError}</p>}
           </div>
         </div>
 

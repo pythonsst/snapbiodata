@@ -40,7 +40,13 @@ export default function SupportDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="no-print fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Support SnapBiodata"
+        className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-maroon/10 text-2xl">💛</div>
           <h2 className="mt-3 text-lg font-bold text-ink">Help keep sharing free</h2>

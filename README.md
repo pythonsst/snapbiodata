@@ -86,6 +86,12 @@ Deploy on [Vercel](https://vercel.com/new) (Next.js auto-detected). For the **sh
 
 Without Redis the editor and PDF still work; only publishing needs it.
 
+> **Note on sharing:** the build-and-share-a-link feature is fully implemented
+> (`src/app/api/publish`, `src/app/[slug]`, `src/lib/store`) but currently gated
+> behind a small "support" prompt because it needs a paid Redis store. Once you
+> connect Upstash (above), wire the editor's share button to `/api/publish` to
+> turn it on. It's intentionally dormant, not dead code.
+
 ## 🤝 Contributing
 
 We'd love your help — new templates, **languages/translations**, bug fixes, and ideas all welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) and open a PR. Be kind (see the [Code of Conduct](./CODE_OF_CONDUCT.md)).
