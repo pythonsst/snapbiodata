@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import BiodataForm from "@/components/BiodataForm";
 import BiodataPreview from "@/components/BiodataPreview";
-import PublishDialog from "@/components/PublishDialog";
+import SupportDialog from "@/components/SupportDialog";
 import { templates, defaultTemplateId, getTemplate } from "@/components/templates";
 import { sampleBiodata, type Biodata } from "@/data/biodata";
 
@@ -62,7 +62,7 @@ export default function Home() {
       </header>
 
       {showPublish && (
-        <PublishDialog data={data} templateId={templateId} onClose={() => setShowPublish(false)} />
+        <SupportDialog onClose={() => setShowPublish(false)} />
       )}
 
       {/* Body: form (left) + preview (right) */}
