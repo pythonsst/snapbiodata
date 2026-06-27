@@ -79,13 +79,21 @@ export default function FramedDoc(props: FramedDocProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, padTop, padBottom, padX, visibilityTick]);
 
-  // Re-paginate when the measurer becomes visible or changes size.
+  // Re-paginate when the measurer becomes visible or changes size, and once the
+  // web fonts finish loading — on mobile the serif font often loads *after* the
+  // first measure, which would otherwise leave the page count measured against
+  // the fallback font's metrics.
   useEffect(() => {
+    const bump = () => setVisibilityTick((t) => t + 1);
+    let ro: ResizeObserver | undefined;
     const el = measureRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => setVisibilityTick((t) => t + 1));
-    ro.observe(el);
-    return () => ro.disconnect();
+    if (el && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(bump);
+      ro.observe(el);
+    }
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+    fonts?.ready.then(bump).catch(() => {});
+    return () => ro?.disconnect();
   }, []);
 
   const contentStyle = {
