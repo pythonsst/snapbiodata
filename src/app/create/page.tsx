@@ -10,12 +10,14 @@ import Button from "@/components/ui/Button";
 import { ArrowRightIcon, DownloadIcon } from "@/components/ui/icons";
 import { defaultTemplateId, getTemplate } from "@/components/templates";
 import { sampleBiodata, type Biodata } from "@/data/biodata";
+import { slugify } from "@/lib/slug";
 
 export default function CreatePage() {
   const [data, setData] = useState<Biodata>(sampleBiodata);
   const [templateId, setTemplateId] = useState<string>(defaultTemplateId);
   const [showPublish, setShowPublish] = useState(false);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("t");
@@ -25,19 +27,31 @@ export default function CreatePage() {
     }
   }, []);
 
-  // Print is synchronous and blocks the main thread, so we (a) keep it out of the
-  // click handler for a snappy interaction, and (b) switch to the preview tab
-  // first — on mobile the preview may be on the hidden tab, where it measures 0
-  // and paginates wrong. Deferring lets it become visible and re-paginate first.
-  const handleDownload = useCallback(() => {
+  // We render the PDF ourselves (see lib/pdf) instead of window.print(), so the
+  // output is identical on every device. Ensure the preview is visible first
+  // (on mobile it may be on the hidden tab) and let it lay out before capturing.
+  const handleDownload = useCallback(async () => {
     setMobileTab("preview");
-    window.setTimeout(() => window.print(), 150);
-  }, []);
+    setDownloading(true);
+    try {
+      await new Promise((r) => window.setTimeout(r, 300));
+      const area = document.getElementById("print-area");
+      if (!area) throw new Error("preview not ready");
+      const name = slugify(data.values.fullName || "") || "biodata";
+      const { downloadBiodataPdf } = await import("@/lib/pdf");
+      await downloadBiodataPdf(area, `${name}-biodata.pdf`);
+    } catch (err) {
+      console.error(err);
+      window.alert("Sorry, the PDF couldn't be generated. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  }, [data.values.fullName]);
 
   const downloadBtn = (cls = "") => (
-    <Button variant="secondary" className={cls} onClick={handleDownload}>
+    <Button variant="secondary" className={cls} onClick={handleDownload} disabled={downloading}>
       <DownloadIcon />
-      Download PDF
+      {downloading ? "Preparing…" : "Download PDF"}
     </Button>
   );
 

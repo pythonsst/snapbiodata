@@ -15,12 +15,6 @@ const GAPS: Gaps = {
 };
 const BUFFER = 10; // safety so a too-tall page never forces a browser split
 
-// iOS WebKit (iPhone Safari/Chrome) reserves a page margin even when we ask for
-// `@page { margin: 0 }`, so the real printable height is less than a full A4.
-// Budget each page's content for that reduced height so a page never spills onto
-// an extra sheet on a phone. ~0.5in total reserve covers iOS's default margins.
-const PRINT_MARGIN_MM = 14; // per side
-
 export interface FramedDocProps {
   data: Biodata;
   bg?: string;
@@ -76,8 +70,7 @@ export default function FramedDoc(props: FramedDocProps) {
   const sig = JSON.stringify(data.values) + (data.photo ? "1" : "0") + data.header + rowLevel;
 
   useLayoutEffect(() => {
-    const usableH = A4_H - 2 * PRINT_MARGIN_MM * MM;
-    const contentPx = usableH - (padTop + padBottom) * MM - BUFFER;
+    const contentPx = A4_H - (padTop + padBottom) * MM - BUFFER;
     const heights = refs.current.map((el) => (el ? el.offsetHeight : 0));
     // A hidden ancestor measures every unit as 0 — don't paginate from garbage.
     if (heights.every((v) => v === 0) && units.length > 0) return;
