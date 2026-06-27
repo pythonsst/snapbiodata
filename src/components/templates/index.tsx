@@ -13,8 +13,9 @@ export interface TemplateMeta {
   Component: ComponentType<TemplateProps>;
 }
 
-/** All available biodata templates. Add new entries here to expose them. */
-export const templates: TemplateMeta[] = [
+/** All available biodata templates. Add new entries here to expose them.
+ *  Typed as a non-empty tuple so `templates[0]` is always defined. */
+export const templates: [TemplateMeta, ...TemplateMeta[]] = [
   {
     id: "traditional",
     name: "Traditional",

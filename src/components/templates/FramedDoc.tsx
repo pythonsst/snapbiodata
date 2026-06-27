@@ -53,16 +53,25 @@ export default function FramedDoc(props: FramedDocProps) {
     }
   });
 
+  // Null-safe: a unit may reference a section/row that no longer exists for a
+  // brief render (e.g. cached pages from before the user deleted a field). Guard
+  // every lookup and render nothing rather than crash.
   const nodeFor = (u: Unit): ReactNode => {
-    if (u.type === "header") return header;
-    if (u.type === "section") return props.renderSection!(sections[u.s]);
-    if (u.type === "heading") return props.renderHeading!(sections[u.s].title);
-    return props.renderRow!(sections[u.s].rows[u.r]);
+    if (u.type === "header") return header ?? null;
+    const section = sections[u.s];
+    if (!section) return null;
+    if (u.type === "section") return props.renderSection?.(section) ?? null;
+    if (u.type === "heading") return props.renderHeading?.(section.title) ?? null;
+    const row = section.rows[u.r];
+    if (!row) return null;
+    return props.renderRow?.(row) ?? null;
   };
 
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const measureRef = useRef<HTMLDivElement>(null);
-  const [pages, setPages] = useState<Unit[][] | null>(null);
+  // Cache the paginated pages together with the data signature they were built
+  // from, so a render never lays out stale pages against freshly-changed data.
+  const [paged, setPaged] = useState<{ sig: string; pages: Unit[][] } | null>(null);
   // Bumped whenever the measurer's box changes size (e.g. the preview goes from
   // display:none → visible on mobile), forcing a re-measure + re-paginate.
   const [visibilityTick, setVisibilityTick] = useState(0);
@@ -75,7 +84,7 @@ export default function FramedDoc(props: FramedDocProps) {
     // A hidden ancestor measures every unit as 0 — don't paginate from garbage.
     if (heights.every((v) => v === 0) && units.length > 0) return;
     // Derived layout from measured DOM — setting state here is intentional.
-    setPages(paginate(units, { contentPx, heights, gaps: GAPS }));
+    setPaged({ sig, pages: paginate(units, { contentPx, heights, gaps: GAPS }) });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, padTop, padBottom, padX, visibilityTick]);
 
@@ -103,7 +112,10 @@ export default function FramedDoc(props: FramedDocProps) {
     paddingBottom: `${padBottom}mm`,
   };
 
-  const laid = pages ?? [units];
+  // Only use cached pages when they match the current data; otherwise lay out
+  // the current units directly. This prevents rendering pages whose row indices
+  // no longer exist after an edit (the cause of the "reading 'label'" crash).
+  const laid = paged && paged.sig === sig ? paged.pages : [units];
 
   return (
     <>

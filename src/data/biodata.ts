@@ -130,8 +130,9 @@ export interface BiodataRecord {
   createdAt: number;
 }
 
-/** A short list of common header invocations users can pick from. */
-export const headerPresets: string[] = [
+/** A short list of common header invocations users can pick from.
+ *  Non-empty tuple so `headerPresets[0]` is always a defined string. */
+export const headerPresets: [string, ...string[]] = [
   "|| Shri Ganeshaya Namaha ||",
   "॥ श्री गणेशाय नमः ॥",
   "|| Om ||",
