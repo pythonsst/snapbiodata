@@ -135,21 +135,20 @@ export default function FramedDoc(props: FramedDocProps) {
 
   return (
     <>
-      {/* Hidden measurer at the real content width */}
-      <div
-        aria-hidden
-        style={{ position: "absolute", left: -99999, top: 0, width: A4_W - 2 * padX * MM, visibility: "hidden" }}
-      >
-        {units.map((u, i) => (
+      {/* Hidden measurer — wrapped in a 0×0 clip so it never affects page width. */}
+      <div aria-hidden style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}>
+        <div style={{ width: A4_W - 2 * padX * MM }}>
+          {units.map((u, i) => (
           <div
             key={i}
             ref={(el) => {
               refs.current[i] = el;
             }}
-          >
-            {nodeFor(u)}
-          </div>
-        ))}
+            >
+              {nodeFor(u)}
+            </div>
+          ))}
+        </div>
       </div>
 
       {laid.map((pageUnits, pi) => (

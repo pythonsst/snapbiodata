@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
-import { biodataSections, headerPresets, type Biodata, type FieldDef } from "@/data/biodata";
+import { useState, type ChangeEvent, type ReactNode } from "react";
+import {
+  biodataSections,
+  headerPresets,
+  emptyBiodata,
+  sampleBiodata,
+  type Biodata,
+  type FieldDef,
+  type SectionDef,
+} from "@/data/biodata";
 
 interface Props {
   data: Biodata;
@@ -10,10 +18,16 @@ interface Props {
 
 export default function BiodataForm({ data, onChange }: Props) {
   const [photoError, setPhotoError] = useState("");
+  const [open, setOpen] = useState<Record<string, boolean>>({
+    photo: true,
+    personal: true,
+    family: false,
+    contact: false,
+  });
+  const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !o[id] }));
 
   const setValue = (key: string, value: string) =>
     onChange({ ...data, values: { ...data.values, [key]: value } });
-
   const setHeader = (header: string) => onChange({ ...data, header });
 
   const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
@@ -36,25 +50,53 @@ export default function BiodataForm({ data, onChange }: Props) {
     reader.readAsDataURL(file);
   };
 
-  return (
-    <div className="space-y-8">
-      {/* Photo + header */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-maroon">Photo & Heading</h2>
+  const filled = (s: SectionDef) => s.fields.filter((f) => (data.values[f.key] ?? "").trim()).length;
 
+  return (
+    <div className="space-y-3">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted">Live preview updates as you type.</p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onChange(sampleBiodata)}
+            className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink hover:border-maroon hover:text-maroon"
+          >
+            Load sample
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPhotoError("");
+              onChange({ ...emptyBiodata });
+            }}
+            className="rounded-md border border-line px-2.5 py-1 text-xs font-medium text-ink hover:border-maroon hover:text-maroon"
+          >
+            Clear all
+          </button>
+        </div>
+      </div>
+
+      {/* Photo & Heading */}
+      <Accordion
+        id="photo"
+        title="Photo & Heading"
+        badge={`${(data.photo ? 1 : 0) + (data.header.trim() ? 1 : 0)}/2`}
+        open={open.photo}
+        onToggle={toggle}
+      >
         <div className="flex items-center gap-4">
-          <div className="h-20 w-16 overflow-hidden rounded-md border border-line bg-canvas">
+          <div className="h-20 w-16 shrink-0 overflow-hidden rounded-md border border-line bg-canvas">
             {data.photo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={data.photo} alt="Profile" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-[10px] text-muted">
-                No photo
-              </div>
+              <div className="flex h-full w-full items-center justify-center text-[10px] text-muted">No photo</div>
             )}
           </div>
           <div className="space-y-2">
-            <label className="inline-block cursor-pointer rounded-lg bg-maroon px-4 py-2 text-sm font-medium text-white hover:bg-maroon-dark transition-colors">
+            <label className="inline-block cursor-pointer rounded-lg bg-maroon px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-maroon-dark">
               {data.photo ? "Change photo" : "Upload photo"}
               <input type="file" accept="image/*" className="hidden" onChange={onPhoto} />
             </label>
@@ -72,7 +114,7 @@ export default function BiodataForm({ data, onChange }: Props) {
           </div>
         </div>
 
-        <div>
+        <div className="mt-4">
           <label className="mb-1.5 block text-sm font-medium text-ink">Heading</label>
           <select
             value={headerPresets.includes(data.header) ? data.header : "__custom"}
@@ -94,11 +136,17 @@ export default function BiodataForm({ data, onChange }: Props) {
             className="mt-2 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm focus:border-maroon focus:outline-none"
           />
         </div>
-      </section>
+      </Accordion>
 
       {biodataSections.map((section) => (
-        <section key={section.id} className="space-y-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-maroon">{section.title}</h2>
+        <Accordion
+          key={section.id}
+          id={section.id}
+          title={section.title}
+          badge={`${filled(section)}/${section.fields.length}`}
+          open={!!open[section.id]}
+          onToggle={toggle}
+        >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {section.fields.map((field) => (
               <Field
@@ -109,9 +157,50 @@ export default function BiodataForm({ data, onChange }: Props) {
               />
             ))}
           </div>
-        </section>
+        </Accordion>
       ))}
     </div>
+  );
+}
+
+function Accordion({
+  id,
+  title,
+  badge,
+  open,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  badge: string;
+  open: boolean;
+  onToggle: (id: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-line bg-surface">
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-sm font-semibold uppercase tracking-wider text-maroon">{title}</span>
+        <span className="flex items-center gap-2.5">
+          <span className="rounded-full bg-canvas px-2 py-0.5 text-[11px] font-medium text-muted">{badge}</span>
+          <svg
+            className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </button>
+      {open && <div className="border-t border-line p-4">{children}</div>}
+    </section>
   );
 }
 
