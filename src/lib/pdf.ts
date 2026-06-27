@@ -36,7 +36,9 @@ export async function downloadBiodataPdf(container: HTMLElement, filename = "bio
   const pdf = new jsPDF({ unit: "pt", format: "a4", compress: true });
 
   for (let i = 0; i < pages.length; i++) {
-    const canvas = await html2canvas(pages[i], {
+    const page = pages[i];
+    if (!page) continue;
+    const canvas = await html2canvas(page, {
       scale: 2, // crisp on retina / when zoomed
       backgroundColor: "#ffffff",
       useCORS: true,
