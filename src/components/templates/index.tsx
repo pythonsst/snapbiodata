@@ -4,6 +4,7 @@ import ElegantTemplate from "./ElegantTemplate";
 import ModernTemplate from "./ModernTemplate";
 import FloralTemplate from "./FloralTemplate";
 import RoyalTemplate from "./RoyalTemplate";
+import GarlandTemplate from "./GarlandTemplate";
 import type { TemplateProps } from "./shared";
 
 export interface TemplateMeta {
@@ -44,6 +45,12 @@ export const templates: TemplateMeta[] = [
     name: "Royal",
     description: "Navy arch-framed photo with mandala accents",
     Component: RoyalTemplate,
+  },
+  {
+    id: "garland",
+    name: "Garland",
+    description: "Golden leaf garlands with peach banners",
+    Component: GarlandTemplate,
   },
 ];
 

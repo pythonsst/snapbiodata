@@ -66,7 +66,7 @@ export default function Home() {
       )}
 
       {/* Body: form (left) + preview (right) */}
-      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,420px)_1fr]">
+      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,420px)_1fr] print:!block print:!p-0 print:!m-0 print:!max-w-none print:!gap-0">
         {/* Form panel */}
         <div className="no-print">
           {/* Template picker */}
@@ -96,8 +96,8 @@ export default function Home() {
         </div>
 
         {/* Preview */}
-        <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-110px)] lg:overflow-y-auto">
-          <div className="rounded-xl bg-canvas p-2 sm:p-4">
+        <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-110px)] lg:overflow-y-auto print:!static print:!h-auto print:!overflow-visible">
+          <div className="rounded-xl bg-canvas p-2 sm:p-4 print:!p-0 print:!bg-transparent">
             <BiodataPreview data={data} templateId={templateId} />
           </div>
         </div>

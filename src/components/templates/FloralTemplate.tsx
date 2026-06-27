@@ -9,18 +9,19 @@ export default function FloralTemplate({ data }: TemplateProps) {
   const sections = renderedSections(data);
 
   return (
-    <div className="a4 doc text-[#4a3b22]" style={{ background: "#fffdf6" }}>
-      <div className="relative min-h-[297mm] p-[12mm]">
-        {/* Gold border + corner flourishes */}
-        <div className="pointer-events-none absolute inset-[8mm] border border-[#caa64a]/60" />
-        <div className="pointer-events-none absolute inset-[8mm] text-[#c79a3a]">
+    <div className="a4 doc relative text-[#4a3b22]">
+      {/* Decorative frame — repeats on every printed page */}
+      <div className="bio-frame" style={{ background: "#fffdf6" }}>
+        <div className="absolute inset-[8mm] border border-[#caa64a]/60" />
+        <div className="absolute inset-[8mm] text-[#c79a3a]">
           <CornerFloral className="absolute -left-1 -top-1 h-16 w-16" />
           <CornerFloral className="absolute -right-1 -top-1 h-16 w-16 -scale-x-100" />
           <CornerFloral className="absolute -bottom-1 -left-1 h-16 w-16 -scale-y-100" />
           <CornerFloral className="absolute -bottom-1 -right-1 h-16 w-16 -scale-100" />
         </div>
+      </div>
 
-        <div className="relative px-[8mm] py-[6mm]">
+      <div className="relative px-[20mm] py-[18mm] print:!px-[20mm] print:!pt-[24mm] print:!pb-[20mm]">
           {/* Om + heading */}
           <div className="text-center">
             <OmMark className="text-[28px] text-[#b8893a]" />
@@ -76,7 +77,6 @@ export default function FloralTemplate({ data }: TemplateProps) {
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 }

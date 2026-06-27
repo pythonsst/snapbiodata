@@ -12,12 +12,14 @@ export default function RoyalTemplate({ data }: TemplateProps) {
   const sections = renderedSections(data);
 
   return (
-    <div className="a4 doc text-[#26303f]" style={{ background: "#ffffff" }}>
-      <div className="relative min-h-[297mm] overflow-hidden px-[14mm] py-[14mm]">
-        {/* Mandala background accents */}
-        <Mandala className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 text-[#1f2a4d]/[0.06]" />
-        <Mandala className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 text-[#1f2a4d]/[0.06]" />
+    <div className="a4 doc relative text-[#26303f]">
+      {/* Mandala accents — repeat on every printed page */}
+      <div className="bio-frame overflow-hidden" style={{ background: "#ffffff" }}>
+        <Mandala className="absolute -right-16 -top-16 h-56 w-56 text-[#1f2a4d]/[0.06]" />
+        <Mandala className="absolute -bottom-20 -left-16 h-56 w-56 text-[#1f2a4d]/[0.06]" />
+      </div>
 
+      <div className="relative px-[16mm] py-[16mm] print:!px-[16mm] print:!pt-[20mm] print:!pb-[16mm]">
         {/* Header: arch photo + name */}
         <div className="relative flex flex-col items-center text-center">
           <OmMark className="text-[24px] text-[#c79a3a]" />

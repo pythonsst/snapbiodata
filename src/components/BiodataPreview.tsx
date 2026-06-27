@@ -12,6 +12,7 @@ export default function BiodataPreview({ data, templateId }: { data: Biodata; te
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
+  // Fit-to-width for the on-screen preview only (print is handled by CSS).
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -25,8 +26,11 @@ export default function BiodataPreview({ data, templateId }: { data: Biodata; te
   const { Component } = getTemplate(templateId);
 
   return (
-    <div ref={wrapRef} className="w-full">
-      <div style={{ width: A4_W * scale, height: A4_H * scale }} className="relative mx-auto">
+    <div ref={wrapRef} className="w-full print:!block">
+      <div
+        style={{ width: A4_W * scale, height: A4_H * scale }}
+        className="relative mx-auto print:!static print:!m-0 print:!h-auto print:!w-auto"
+      >
         <div
           id="print-area"
           style={{

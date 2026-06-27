@@ -45,13 +45,24 @@ body {
 .scroll-slim::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
 .scroll-slim::-webkit-scrollbar-thumb:hover { background: #d9cdc2; }
 
+/* Decorative page frame: sits within the A4 card on screen, and REPEATS on
+   every page in print (position: fixed) so multi-page PDFs are framed alike. */
+.bio-frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 /* ============================================================
-   PRINT — only the biodata page prints (A4), nothing else.
+   PRINT — only the biodata prints; the frame repeats per page.
    ============================================================ */
 @media print {
   @page {
     size: A4;
-    margin: 0;
+    /* Top/bottom give continuation pages clearance from the frame in real
+       browsers (honored on Ctrl+P). Sides are handled by each template's own
+       print padding so the result is consistent even where @page is ignored. */
+    margin: 14mm 0;
   }
   body * {
     visibility: hidden;
@@ -60,16 +71,31 @@ body {
   #print-area * {
     visibility: visible;
   }
-  /* Reset preview scaling for print so it fills the A4 page. */
+  /* Let the biodata flow in normal document flow so @page margins give each
+     page consistent insets and the content paginates cleanly. */
   #print-area {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: static !important;
     transform: none !important;
-    width: 210mm !important;
-    height: auto !important;
-    box-shadow: none !important;
+    width: auto !important;
     margin: 0 !important;
+    box-shadow: none !important;
+  }
+  .a4 {
+    width: auto !important;
+    min-height: 0 !important;
+  }
+  /* The frame becomes fixed → painted on every page, at the page edge. */
+  .bio-frame {
+    position: fixed !important;
+    inset: 0 !important;
+  }
+  /* Safety nets: never split a label/value row; keep headings with their rows. */
+  #print-area dl > div,
+  #print-area section {
+    break-inside: avoid;
+  }
+  #print-area h2 {
+    break-after: avoid;
   }
   .no-print {
     display: none !important;
