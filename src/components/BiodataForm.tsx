@@ -52,6 +52,8 @@ export default function BiodataForm({ data, onChange }: Props) {
     reader.onerror = () => setPhotoError("Sorry, that image couldn't be loaded. Please try another.");
     reader.onload = () => onChange({ ...data, photo: String(reader.result) });
     reader.readAsDataURL(file);
+    // Reset the input so re-selecting the same file (e.g. after Remove) still fires.
+    e.target.value = "";
   };
 
   return (
