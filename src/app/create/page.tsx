@@ -37,9 +37,12 @@ export default function CreatePage() {
       await new Promise((r) => window.setTimeout(r, 300));
       const area = document.getElementById("print-area");
       if (!area) throw new Error("preview not ready");
-      const name = slugify(data.values.fullName || "") || "biodata";
+      // Name-based filename; non-Latin names (e.g. Hindi) slugify to empty, so
+      // fall back to a plain "biodata.pdf" rather than "biodata-biodata.pdf".
+      const slug = slugify(data.values.fullName || "");
+      const filename = slug ? `${slug}-biodata.pdf` : "biodata.pdf";
       const { downloadBiodataPdf } = await import("@/lib/pdf");
-      await downloadBiodataPdf(area, `${name}-biodata.pdf`);
+      await downloadBiodataPdf(area, filename);
     } catch (err) {
       console.error(err);
       window.alert("Sorry, the PDF couldn't be generated. Please try again.");

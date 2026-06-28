@@ -59,7 +59,9 @@ export default function RoyalTemplate({ data }: TemplateProps) {
       >
         {section.title}
       </h2>
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-1.5 px-1 sm:grid-cols-2">
+      {/* Always 2 columns — the document is A4-width regardless of device, so
+          it must not use viewport breakpoints (that made mobile paginate to 2). */}
+      <dl className="grid grid-cols-2 gap-x-8 gap-y-1.5 px-1">
         {section.rows.map((row) => (
           <div key={row.label} className="flex gap-3 text-[12.5px] leading-relaxed">
             <dt className="w-[42%] shrink-0 font-semibold text-[#55606f]">{row.label}</dt>

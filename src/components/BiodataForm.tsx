@@ -52,6 +52,8 @@ export default function BiodataForm({ data, onChange }: Props) {
     reader.onerror = () => setPhotoError("Sorry, that image couldn't be loaded. Please try another.");
     reader.onload = () => onChange({ ...data, photo: String(reader.result) });
     reader.readAsDataURL(file);
+    // Reset the input so re-selecting the same file (e.g. after Remove) still fires.
+    e.target.value = "";
   };
 
   return (
@@ -232,6 +234,24 @@ function Field({
           rows={2}
           className={base}
         />
+      ) : field.type === "combo" ? (
+        <>
+          {/* Type-or-select: free text with suggestions from a datalist. */}
+          <input
+            type="text"
+            list={`${field.key}-options`}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            className={base}
+            autoComplete="off"
+          />
+          <datalist id={`${field.key}-options`}>
+            {field.options?.map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
+        </>
       ) : (
         <input
           type={field.type ?? "text"}
