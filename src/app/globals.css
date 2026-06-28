@@ -25,6 +25,72 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ============================================================
+   PREMIUM / LUXURY ACCENTS
+   Gold-foil text, soft cream "paper" backdrop, refined shadows
+   and a gold hairline rule — used across the marketing surfaces.
+   ============================================================ */
+
+/* Brushed-gold gradient text, e.g. for accent words and est. labels. */
+.text-gold-foil {
+  background: linear-gradient(100deg, #a9781f 0%, #e6c878 38%, #c79a3a 55%, #9a7424 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Warm radial wash over the canvas — subtle depth without an image. */
+.paper-bg {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(60rem 60rem at 8% -10%, rgba(155, 28, 58, 0.06), transparent 55%),
+    radial-gradient(55rem 55rem at 100% 0%, rgba(199, 154, 58, 0.1), transparent 50%);
+}
+
+/* Elevated, slightly warm shadow for hero cards / CTAs. */
+.lux-shadow {
+  box-shadow: 0 24px 60px -28px rgba(123, 21, 48, 0.45), 0 8px 24px -16px rgba(42, 32, 37, 0.25);
+}
+
+/* Gold underline that survives line wraps (no absolute positioning). */
+.gold-underline {
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  padding-bottom: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* A thin gold rule that fades at both ends — section dividers. */
+.gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+/* Gold gradient surface (buttons, seals). */
+.gold-gradient {
+  background: linear-gradient(135deg, #d8b25a 0%, #c79a3a 50%, #a9781f 100%);
+}
+
+/* Maroon gradient for primary CTAs. */
+.maroon-gradient {
+  background: linear-gradient(135deg, #a92142 0%, #9b1c3a 55%, #7d1530 100%);
+}
+
+/* Slow shimmer for the seal ring. */
+@keyframes seal-spin {
+  to { transform: rotate(360deg); }
+}
+.seal-rotate {
+  animation: seal-spin 40s linear infinite;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal-rotate { animation: none; }
+}
+
 /* The biodata document uses serif fonts. */
 .doc {
   font-family: var(--font-serif);

@@ -7,7 +7,7 @@ import BiodataPreview from "@/components/BiodataPreview";
 import TemplatePicker from "@/components/TemplatePicker";
 import SupportDialog from "@/components/SupportDialog";
 import Button from "@/components/ui/Button";
-import { ArrowRightIcon, DownloadIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, DownloadIcon, HeartIcon } from "@/components/ui/icons";
 import { defaultTemplateId, getTemplate } from "@/components/templates";
 import { sampleBiodata, type Biodata } from "@/data/biodata";
 import { slugify } from "@/lib/slug";
@@ -71,11 +71,11 @@ export default function CreatePage() {
       <header className="no-print sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2.5 sm:px-6 sm:py-3">
           <Link href="/" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-maroon text-sm font-bold text-white sm:h-9 sm:w-9">
-              ❤
+            <span className="grid h-8 w-8 place-items-center rounded-xl maroon-gradient text-white ring-1 ring-gold/40 shadow-sm sm:h-9 sm:w-9">
+              <HeartIcon className="h-4 w-4" />
             </span>
             <span className="leading-tight">
-              <span className="block text-sm font-bold text-ink sm:text-base">SnapBiodata</span>
+              <span className="font-display block text-sm font-bold text-ink sm:text-base">SnapBiodata</span>
               <span className="hidden text-xs text-muted sm:block">Free · private · no sign-up</span>
             </span>
           </Link>
