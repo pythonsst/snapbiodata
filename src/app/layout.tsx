@@ -55,6 +55,12 @@ export const metadata: Metadata = {
     title: `${SITE.name} — Free Marriage Biodata Maker`,
     description: SITE.description,
   },
+  // Set GOOGLE_SITE_VERIFICATION in the environment to verify the domain in
+  // Google Search Console. Omitted entirely when the env var is absent.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

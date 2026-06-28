@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { templates } from "@/components/templates";
 import { SITE } from "@/config";
+import { faqs, homeJsonLd } from "@/lib/seo";
 
 const GITHUB_URL = SITE.github;
 
@@ -22,6 +23,13 @@ const steps = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-canvas text-ink">
+      {/* Structured data: helps Google show this as a free web app + FAQ rich results. */}
+      <script
+        type="application/ld+json"
+        // The graph is built from trusted site constants — no user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd(SITE)) }}
+      />
+
       {/* Nav */}
       <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -31,6 +39,7 @@ export default function LandingPage() {
           </Link>
           <nav className="flex items-center gap-2 sm:gap-4">
             <a href="#templates" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">Templates</a>
+            <a href="#faq" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">FAQ</a>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">GitHub</a>
             <Link href="/create" className="rounded-lg bg-maroon px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-maroon-dark">
               Create free
@@ -137,6 +146,29 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ — visible answers mirror the FAQPage JSON-LD above for rich results. */}
+      <section id="faq" className="border-t border-line bg-surface/50">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24">
+          <h2 className="font-display text-center text-3xl font-bold sm:text-4xl">
+            Frequently asked questions
+          </h2>
+          <dl className="mt-10 space-y-4">
+            {faqs.map((f) => (
+              <details
+                key={f.q}
+                className="group rounded-2xl border border-line bg-surface p-5 open:shadow-sm"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+                  <dt>{f.q}</dt>
+                  <span className="text-maroon transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <dd className="mt-3 text-sm leading-relaxed text-muted">{f.a}</dd>
+              </details>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       {/* Open source */}
       <section className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 md:py-24">
         <h2 className="font-display text-3xl font-bold sm:text-4xl">Built in the open 💛</h2>
@@ -171,6 +203,7 @@ export default function LandingPage() {
           <div className="flex gap-5">
             <Link href="/create" className="hover:text-maroon">Create</Link>
             <a href="#templates" className="hover:text-maroon">Templates</a>
+            <a href="#faq" className="hover:text-maroon">FAQ</a>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="hover:text-maroon">GitHub</a>
           </div>
         </div>
