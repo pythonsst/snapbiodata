@@ -58,7 +58,10 @@ export default function LandingPage() {
             <h1 className="font-display mt-5 text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
               Create a stunning <span className="text-maroon">marriage biodata</span> in minutes
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
+            <p className="mt-3 text-base font-semibold text-maroon">
+              Your fast, easy and free biodata maker.
+            </p>
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">
               Pick a template, fill in your details, add a photo, and download a print-ready PDF —
               or share a private link. Beautiful, fast, and free forever.
             </p>
@@ -93,6 +96,20 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* About / SEO intro — keyword-rich but written for humans, not stuffed. */}
+      <section className="mx-auto max-w-3xl px-4 pb-4 text-center sm:px-6">
+        <h2 className="font-display text-2xl font-bold sm:text-3xl">
+          The free biodata maker built for marriage
+        </h2>
+        <p className="mx-auto mt-4 text-lg leading-relaxed text-muted">
+          SnapBiodata is a fast, easy and completely free biodata maker. Create a stunning
+          marriage profile in minutes — choose a beautiful, print-ready template, add your photo,
+          and download your biodata instantly or share it as a private link. No sign-up, no
+          watermark and no cost. Whether you&apos;re preparing a profile for yourself or a family
+          member, SnapBiodata helps you make a great first impression with your perfect match.
+        </p>
       </section>
 
       {/* Features */}
