@@ -39,6 +39,7 @@ export default function LandingPage() {
           </Link>
           <nav className="flex items-center gap-2 sm:gap-4">
             <a href="#templates" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">Templates</a>
+            <Link href="/blog" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">Blog</Link>
             <a href="#faq" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">FAQ</a>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="hidden px-3 py-2 text-sm font-medium text-muted hover:text-maroon sm:block">GitHub</a>
             <Link href="/create" className="rounded-lg bg-maroon px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-maroon-dark">
@@ -219,8 +220,9 @@ export default function LandingPage() {
           <p>© {2026} SnapBiodata · Free &amp; open source (MIT)</p>
           <div className="flex gap-5">
             <Link href="/create" className="hover:text-maroon">Create</Link>
-            <a href="#templates" className="hover:text-maroon">Templates</a>
+            <Link href="/blog" className="hover:text-maroon">Blog</Link>
             <a href="#faq" className="hover:text-maroon">FAQ</a>
+            <a href={`mailto:${SITE.contactEmail}?subject=SnapBiodata%20feedback`} className="hover:text-maroon">Feedback</a>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="hover:text-maroon">GitHub</a>
           </div>
         </div>
